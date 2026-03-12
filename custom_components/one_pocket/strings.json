@@ -1,0 +1,38 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Connexion ONE Pocket",
+        "description": "Entrez vos identifiants ONE Pocket (compte parent)",
+        "data": {
+          "base_url": "URL de l'instance ONE",
+          "username": "Identifiant",
+          "password": "Mot de passe"
+        }
+      },
+      "child": {
+        "title": "Choix de l'enfant",
+        "description": "Sélectionnez l'enfant à suivre",
+        "data": {
+          "child_id": "Enfant"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Identifiant ou mot de passe incorrect",
+      "cannot_connect": "Impossible de se connecter au serveur ONE"
+    },
+    "abort": {
+      "already_configured": "Cet enfant est déjà configuré"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Intervalle de mise à jour (minutes)"
+        }
+      }
+    }
+  }
+}

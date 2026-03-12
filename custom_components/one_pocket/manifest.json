@@ -1,0 +1,12 @@
+{
+  "domain": "one_pocket",
+  "name": "ONE Pocket",
+  "codeowners": ["@pikipixel"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/pikipixel/hass-one-pocket",
+  "integration_type": "hub",
+  "iot_class": "cloud_polling",
+  "requirements": [],
+  "version": "0.1.0"
+}
