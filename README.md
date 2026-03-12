@@ -4,53 +4,53 @@
 [![GitHub Release](https://img.shields.io/github/v/release/pikipixel/hass-one-pocket)](https://github.com/pikipixel/hass-one-pocket/releases)
 [![License: MIT](https://img.shields.io/github/license/pikipixel/hass-one-pocket)](LICENSE)
 
-Integration Home Assistant pour [ONE Pocket](https://edifice.io/nos-produits/one/one-pocket/) (Edifice), l'espace numerique de travail (ENT) utilise dans les ecoles primaires francaises.
+Intégration Home Assistant pour [ONE Pocket](https://edifice.io/nos-produits/one/one-pocket/) (Edifice), l'espace numérique de travail (ENT) utilisé dans les écoles primaires françaises.
 
-## Fonctionnalites
+## Fonctionnalités
 
 | Capteur | Description |
 |---------|-------------|
 | **Messages non lus** | Nombre de messages non lus + liste des derniers messages |
 | **Devoirs** | Cahier de textes avec contenu des devoirs |
-| **Actualites** | Publications de l'ecole (fil d'actualites) |
+| **Actualités** | Publications de l'école (fil d'actualités) |
 | **Blog** | Articles des blogs de classe |
-| **Carnet de liaison** | Communications ecole-famille |
+| **Carnet de liaison** | Communications école-famille |
 | **Notifications** | Timeline des notifications ONE Pocket |
 
-Chaque capteur expose les donnees detaillees dans ses attributs, utilisables dans des cartes Lovelace et des automations.
+Chaque capteur expose les données détaillées dans ses attributs, utilisables dans des cartes Lovelace et des automations.
 
 ## Installation
 
-### HACS (recommande)
+### HACS (recommandé)
 
 1. Ouvrir HACS dans Home Assistant
-2. Cliquer sur **Integrations** > **+ Explorer et telecharger des depots**
+2. Cliquer sur **Intégrations** > **+ Explorer et télécharger des dépôts**
 3. Rechercher **"ONE Pocket"**
-4. Cliquer sur **Telecharger**
-5. Redemarrer Home Assistant
-6. Aller dans **Parametres** > **Appareils et services** > **Ajouter une integration** > **ONE Pocket**
+4. Cliquer sur **Télécharger**
+5. Redémarrer Home Assistant
+6. Aller dans **Paramètres** > **Appareils et services** > **Ajouter une intégration** > **ONE Pocket**
 
 ### Installation manuelle
 
-1. Copier le dossier `custom_components/one_pocket` dans votre repertoire `custom_components`
-2. Redemarrer Home Assistant
-3. Ajouter l'integration via l'interface
+1. Copier le dossier `custom_components/one_pocket` dans votre répertoire `custom_components`
+2. Redémarrer Home Assistant
+3. Ajouter l'intégration via l'interface
 
 ## Configuration
 
-Lors de l'ajout de l'integration, vous aurez besoin de :
+Lors de l'ajout de l'intégration, vous aurez besoin de :
 
 - **URL de l'instance ONE** : l'adresse de votre ENT (ex: `https://oneconnect.edifice.io`)
 - **Identifiant** : votre login parent ONE Pocket
 - **Mot de passe** : votre mot de passe parent ONE Pocket
 
-Si votre compte parent est lie a plusieurs enfants, vous pourrez choisir l'enfant a suivre.
+Si votre compte parent est lié à plusieurs enfants, vous pourrez choisir l'enfant à suivre.
 
 ### Options
 
-| Option | Defaut | Description |
+| Option | Défaut | Description |
 |--------|--------|-------------|
-| Intervalle de mise a jour | 15 min | Frequence de rafraichissement des donnees (5-60 min) |
+| Intervalle de mise à jour | 15 min | Fréquence de rafraîchissement des données (5-60 min) |
 
 ## Exemples d'utilisation
 
@@ -94,15 +94,15 @@ content: >-
 
 ## Plateformes ONE compatibles
 
-Cette integration fonctionne avec toutes les instances ONE (Edifice) :
+Cette intégration fonctionne avec toutes les instances ONE (Edifice) :
 - `oneconnect.edifice.io`
-- Instances academiques et departementales
+- Instances académiques et départementales
 - Toute plateforme utilisant le framework Edifice/entcore
 
-## Credits
+## Crédits
 
-- API basee sur le framework open source [entcore](https://github.com/edificeio/entcore) par Edifice
-- Inspire par [hass-pronote](https://github.com/delphiki/hass-pronote) et [hass-ecoledirecte](https://github.com/hacf-fr/hass-ecoledirecte)
+- API basée sur le framework open source [entcore](https://github.com/edificeio/entcore) par Edifice
+- Inspiré par [hass-pronote](https://github.com/delphiki/hass-pronote) et [hass-ecoledirecte](https://github.com/hacf-fr/hass-ecoledirecte)
 
 ## Licence
 
