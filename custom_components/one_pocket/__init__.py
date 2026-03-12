@@ -5,10 +5,11 @@ from __future__ import annotations
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME, Platform
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
-from .api import OnePocketClient
-from .const import CONF_BASE_URL, DEFAULT_BASE_URL, DOMAIN
+from .api import OnePocketApiError, OnePocketAuthError, OnePocketClient
+from .const import CONF_BASE_URL, DEFAULT_BASE_URL, DOMAIN, LOGGER
 from .coordinator import OnePocketCoordinator
 
 PLATFORMS: list[Platform] = [Platform.SENSOR]
@@ -24,7 +25,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         password=entry.data[CONF_PASSWORD],
     )
 
-    await client.authenticate()
+    try:
+        await client.authenticate()
+    except OnePocketAuthError as err:
+        raise ConfigEntryNotReady(
+            f"Authentication failed, will retry: {err}"
+        ) from err
+    except (OnePocketApiError, TimeoutError) as err:
+        raise ConfigEntryNotReady(
+            f"Cannot connect to ONE Pocket, will retry: {err}"
+        ) from err
 
     coordinator = OnePocketCoordinator(hass, client, entry)
     await coordinator.async_config_entry_first_refresh()

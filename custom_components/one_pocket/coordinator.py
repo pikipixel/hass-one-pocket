@@ -54,6 +54,12 @@ class OnePocketCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         }
 
         try:
+            # Re-authenticate if needed (token may have expired between updates)
+            try:
+                await self.client.authenticate()
+            except OnePocketApiError as err:
+                LOGGER.warning("Re-authentication failed, using existing token: %s", err)
+
             # Fetch all data types, each in its own try/except
             # so one failure doesn't prevent other data from loading
             try:
