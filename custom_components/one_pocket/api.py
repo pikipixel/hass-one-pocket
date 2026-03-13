@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import time
 from datetime import date, timedelta
 from typing import Any
 
@@ -48,6 +49,7 @@ class OnePocketClient:
         self._password = password
         self._access_token: str | None = None
         self._refresh_token: str | None = None
+        self._token_expires_at: float = 0
         self._user_info: dict[str, Any] | None = None
 
     async def authenticate(self) -> dict[str, Any]:
@@ -90,6 +92,9 @@ class OnePocketClient:
 
         self._access_token = result["access_token"]
         self._refresh_token = result.get("refresh_token")
+        expires_in = result.get("expires_in", 3600)
+        self._token_expires_at = time.monotonic() + int(expires_in)
+        LOGGER.debug("Token acquired, expires in %s seconds", expires_in)
 
     async def _refresh_access_token(self) -> None:
         """Refresh the access token."""
@@ -123,17 +128,34 @@ class OnePocketClient:
         result = await resp.json(content_type=None)
 
         if "access_token" not in result:
-            # Refresh failed, re-authenticate
+            # Refresh failed, re-authenticate with password
+            LOGGER.debug("Refresh token failed, falling back to password grant")
             await self._get_token()
             return
 
         self._access_token = result["access_token"]
         self._refresh_token = result.get("refresh_token", self._refresh_token)
+        expires_in = result.get("expires_in", 3600)
+        self._token_expires_at = time.monotonic() + int(expires_in)
+        LOGGER.debug("Token refreshed, expires in %s seconds", expires_in)
+
+    async def _ensure_token(self) -> None:
+        """Ensure we have a valid token, refreshing proactively if needed."""
+        if not self._access_token:
+            await self._get_token()
+            return
+
+        remaining = self._token_expires_at - time.monotonic()
+        if remaining < 720:  # Less than 12 min left (20% of 1h token)
+            LOGGER.debug(
+                "Token expires in %.0f seconds, proactively refreshing",
+                max(remaining, 0),
+            )
+            await self._refresh_access_token()
 
     async def _request(self, method: str, path: str, **kwargs: Any) -> Any:
         """Make an authenticated API request."""
-        if not self._access_token:
-            await self._get_token()
+        await self._ensure_token()
 
         headers = kwargs.pop("headers", {})
         headers["Authorization"] = f"Bearer {self._access_token}"
@@ -142,17 +164,35 @@ class OnePocketClient:
             method,
             f"{self._base_url}{path}",
             headers=headers,
+            allow_redirects=False,
             **kwargs,
         )
 
+        # ENTCore may redirect to login page instead of returning 401
+        if resp.status in (301, 302):
+            location = resp.headers.get("Location", "")
+            if "/auth/login" in location:
+                LOGGER.debug("Redirected to login page, refreshing token")
+                await self._refresh_access_token()
+                headers["Authorization"] = f"Bearer {self._access_token}"
+                resp = await self._session.request(
+                    method,
+                    f"{self._base_url}{path}",
+                    headers=headers,
+                    allow_redirects=False,
+                    **kwargs,
+                )
+
         if resp.status == 401:
             # Token expired, refresh and retry
+            LOGGER.debug("Got 401, refreshing token")
             await self._refresh_access_token()
             headers["Authorization"] = f"Bearer {self._access_token}"
             resp = await self._session.request(
                 method,
                 f"{self._base_url}{path}",
                 headers=headers,
+                allow_redirects=False,
                 **kwargs,
             )
 
