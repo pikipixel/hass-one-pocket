@@ -24,24 +24,10 @@ Chaque capteur expose les données détaillées dans ses attributs, utilisables 
 ### HACS (recommandé)
 
 1. Ouvrir HACS dans Home Assistant
-2. Cliquer sur **Intégrations** > **+ Explorer et télécharger des dépôts**
-3. Rechercher **"ONE Pocket"**
-4. Cliquer sur **Télécharger**
-5. Redémarrer Home Assistant
-6. Aller dans **Paramètres** > **Appareils et services** > **Ajouter une intégration** > **ONE Pocket**
-
-### HACS - Dépôt personnalisé (en attendant la validation)
-
-Si l'intégration n'apparaît pas encore dans le catalogue HACS :
-
-1. Ouvrir HACS dans Home Assistant
-2. Cliquer sur **Intégrations** > menu **⋮** (en haut à droite) > **Dépôts personnalisés**
-3. URL : `https://github.com/pikipixel/hass-one-pocket`
-4. Catégorie : **Intégration**
-5. Cliquer **Ajouter**
-6. Rechercher "ONE Pocket" dans HACS et l'installer
-7. Redémarrer Home Assistant
-8. Aller dans **Paramètres** > **Appareils et services** > **Ajouter une intégration** > **ONE Pocket**
+2. Rechercher **"ONE Pocket"**
+3. Cliquer sur **Télécharger**
+4. Redémarrer Home Assistant
+5. Aller dans **Paramètres** > **Appareils et services** > **Ajouter une intégration** > **ONE Pocket**
 
 ### Installation manuelle
 
