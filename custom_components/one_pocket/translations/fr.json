@@ -34,5 +34,25 @@
         }
       }
     }
+  },
+  "services": {
+    "mark_messages_read": {
+      "name": "Marquer des messages comme lus",
+      "description": "Marque des messages de la messagerie ONE comme lus (ou non lus).",
+      "fields": {
+        "message_ids": {
+          "name": "Messages",
+          "description": "Identifiants des messages (champ id de l'attribut messages du capteur Messages non lus)."
+        },
+        "unread": {
+          "name": "Non lu",
+          "description": "Activer pour remettre les messages en non lu au lieu de les marquer comme lus."
+        },
+        "config_entry_id": {
+          "name": "Compte",
+          "description": "Entrée ONE Pocket à utiliser. Par défaut, chaque compte parent configuré est appelé une fois."
+        }
+      }
+    }
   }
 }

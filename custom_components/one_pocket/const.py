@@ -16,3 +16,8 @@ CONF_CHILD_NAME = "child_name"
 CONF_STRUCTURE_ID = "structure_id"
 
 DEFAULT_SCAN_INTERVAL = 15  # minutes
+
+SERVICE_MARK_MESSAGES_READ = "mark_messages_read"
+ATTR_MESSAGE_IDS = "message_ids"
+ATTR_UNREAD = "unread"
+ATTR_CONFIG_ENTRY_ID = "config_entry_id"

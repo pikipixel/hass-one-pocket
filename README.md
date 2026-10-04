@@ -76,6 +76,25 @@ automation:
             {% endif %}
 ```
 
+### Action : marquer des messages comme lus
+
+L'action `one_pocket.mark_messages_read` marque des messages de la messagerie ONE comme lus (ou non lus avec `unread: true`). Les identifiants sont ceux du champ `id` de l'attribut `messages` du capteur *Messages non lus*.
+
+```yaml
+action: one_pocket.mark_messages_read
+data:
+  message_ids:
+    - "{{ state_attr('sensor.one_pocket_mon_enfant_messages_non_lus', 'messages')[0].id }}"
+```
+
+| Champ | Requis | Description |
+|-------|--------|-------------|
+| `message_ids` | oui | Liste d'identifiants de messages |
+| `unread` | non | `true` pour remettre en non lu (défaut : `false`) |
+| `config_entry_id` | non | Entrée ONE Pocket à utiliser ; par défaut, chaque compte parent configuré est appelé une fois |
+
+Les capteurs sont rafraîchis juste après l'appel.
+
 ### Carte Lovelace : devoirs
 
 ```yaml

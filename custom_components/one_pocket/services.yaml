@@ -1,0 +1,18 @@
+mark_messages_read:
+  fields:
+    message_ids:
+      required: true
+      example: '["0b870635-ebf5-4c3b-a1fc-14767afd718f"]'
+      selector:
+        text:
+          multiple: true
+    unread:
+      required: false
+      default: false
+      selector:
+        boolean:
+    config_entry_id:
+      required: false
+      selector:
+        config_entry:
+          integration: one_pocket

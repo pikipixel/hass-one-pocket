@@ -261,6 +261,18 @@ class OnePocketClient:
             })
         return result
 
+    async def set_messages_unread(
+        self, message_ids: list[str], unread: bool = False
+    ) -> None:
+        """Mark inbox messages as read (default) or unread."""
+        if not message_ids:
+            return
+        await self._request(
+            "POST",
+            "/conversation/toggleUnread",
+            json={"id": message_ids, "unread": unread},
+        )
+
     async def get_homeworks(self, diary_id: str) -> list[dict]:
         """Get homework entries from a diary."""
         result = await self._request("GET", f"/homeworks/get/{diary_id}")
