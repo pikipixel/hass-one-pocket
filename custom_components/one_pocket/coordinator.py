@@ -11,7 +11,53 @@ from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api import OnePocketApiError, OnePocketAuthError, OnePocketClient
-from .const import CONF_CHILD_NAME, DEFAULT_SCAN_INTERVAL, DOMAIN, LOGGER
+from .const import CONF_CHILD_ID, CONF_CHILD_NAME, DEFAULT_SCAN_INTERVAL, DOMAIN, LOGGER
+
+
+def _normalize(text: str) -> str:
+    """Lowercase, no accents, no spaces: makes 'CM2 C' match 'cm2c'."""
+    import unicodedata
+
+    text = unicodedata.normalize("NFKD", text)
+    return "".join(c for c in text if c.isalnum()).lower()
+
+
+_FILLER_WORDS = {"annee", "de", "des", "du", "la", "le", "les", "classe"}
+
+
+def _class_keys(class_name: str) -> list[str]:
+    """Ways a class may be written in a diary name.
+
+    "Cours préparatoire B" is usually abbreviated "CPb" in diary titles and
+    "Cours moyen 2ème année C" becomes "CM2C": try the full name and the
+    acronym made of the initials of the long words, the digits of numbered
+    words and the short tokens, ignoring filler words such as "année".
+    """
+    keys = [_normalize(class_name)]
+    parts: list[str] = []
+    for word in class_name.replace("-", " ").split():
+        norm = _normalize(word)
+        if not norm:
+            continue
+        if norm[0].isdigit():
+            # "2ème année" -> "2"
+            parts.append("".join(ch for ch in norm if ch.isdigit()))
+        elif norm in _FILLER_WORDS:
+            continue
+        elif len(norm) <= 2:
+            parts.append(norm)
+        else:
+            parts.append(norm[0])
+    acronym = "".join(parts)
+    if len(acronym) >= 3 and acronym not in keys:
+        keys.append(acronym)
+    return [k for k in keys if k]
+
+
+def diary_matches_classes(diary_name: str, class_names: list[str]) -> bool:
+    """True when the diary name mentions one of the child's classes."""
+    name = _normalize(diary_name)
+    return any(key in name for c in class_names for key in _class_keys(c))
 
 
 class OnePocketCoordinator(DataUpdateCoordinator[dict[str, Any]]):
@@ -28,7 +74,10 @@ class OnePocketCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         """Initialize the coordinator."""
         self.client = client
         self._child_name = config_entry.data.get(CONF_CHILD_NAME, "")
+        self._child_id = config_entry.data.get(CONF_CHILD_ID, "")
         self._diary_ids: list[str] = []
+        self._diaries: list[dict] = []
+        self._class_names: list[str] = []
 
         super().__init__(
             hass,
@@ -47,6 +96,8 @@ class OnePocketCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             "unread_messages": 0,
             "messages": [],
             "homeworks": [],
+            "diaries": [],
+            "class_names": [],
             "news": [],
             "blog_posts": [],
             "schoolbook": [],
@@ -70,14 +121,47 @@ class OnePocketCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 LOGGER.warning("Failed to fetch messages: %s", err)
 
             try:
-                # Discover homework diaries on first run
+                # Discover homework diaries on first run. A parent account sees
+                # the diaries of all its children: keep only those whose name
+                # mentions one of this child's classes (fall back to all of them
+                # when nothing matches, e.g. a diary named after the teacher).
                 if not self._diary_ids:
                     diaries = await self.client.get_homework_diaries()
-                    self._diary_ids = [d["id"] for d in diaries]
+                    if self._child_id and not self._class_names:
+                        try:
+                            self._class_names = await self.client.get_user_classes(
+                                self._child_id
+                            )
+                        except OnePocketApiError as err:
+                            LOGGER.debug("Could not read classes of child: %s", err)
+                    selected = [
+                        d
+                        for d in diaries
+                        if diary_matches_classes(d["name"], self._class_names)
+                    ]
+                    if not selected:
+                        if self._class_names and len(diaries) > 1:
+                            LOGGER.info(
+                                "No homework diary matches classes %s of %s; "
+                                "using all %d diaries",
+                                self._class_names,
+                                self._child_name,
+                                len(diaries),
+                            )
+                        selected = diaries
+                    self._diaries = [
+                        {**d, "selected": d in selected} for d in diaries
+                    ]
+                    self._diary_ids = [d["id"] for d in selected]
+                data["diaries"] = self._diaries
+                data["class_names"] = self._class_names
 
                 all_hw = []
+                names = {d["id"]: d["name"] for d in self._diaries}
                 for diary_id in self._diary_ids:
                     entries = await self.client.get_homeworks(diary_id)
+                    for entry in entries:
+                        entry["diary"] = names.get(diary_id, "")
                     all_hw.extend(entries)
                 # Sort by date
                 all_hw.sort(key=lambda e: e.get("date", ""))

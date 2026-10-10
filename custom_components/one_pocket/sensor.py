@@ -120,6 +120,8 @@ class OnePocketHomeworkSensor(OnePocketBaseSensor):
         """Return homework entries as attributes."""
         return {
             "entries": self.coordinator.data.get("homeworks", []),
+            "class_names": self.coordinator.data.get("class_names", []),
+            "diaries": self.coordinator.data.get("diaries", []),
         }
 
 
